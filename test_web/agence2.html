@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rights Acceptance Contract For Agence</title>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.2.7-rc.0/web3.min.js"></script>
+</head>
+<body>
+    <button id="connectButton">Connect to MetaMask</button>
+    <p id="accountArea"></p>
+
+    <button id="connectContractButton">Connect to Contract</button>
+    <p id="contractArea"></p>
+    
+    <h2>Agence Information</h2>
+    <form id="agenceForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+        <label for="subscription_type">Subscription Type:</label>
+        <input type="text" id="subscription_type" name="subscription_type" required>
+        <button type="button" id="acceptRightsButton">Accept Rights</button>
+        <button id="getAgenceInfoByAddressButton">Get Team Manager Info By Address</button>
+    </form>
+
+    <script>
+        window.addEventListener('load', function () {
+            // Get the elements from the DOM
+            const connectButton = document.getElementById("connectButton");
+            const connectContractButton = document.getElementById("connectContractButton");
+            const acceptRightsButton = document.getElementById("acceptRightsButton");
+            const accountArea = document.getElementById("accountArea");
+            const contractArea = document.getElementById("contractArea");
+            const resultArea = document.getElementById("resultArea");
+            const getAgenceInfoByAddressButton = document.getElementById("getAgenceInfoByAddressButton");
+
+            // Define the contract address
+            const contractAddress = "0x0705846c5223158fcC5621ed48668adeaDE5A8Cf"; // Replace with your contract address
+
+            // Define the contract ABI
+            const contractABI = [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "agence",
+          "type": "address"
+        }
+      ],
+      "name": "RightsAccepted",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_agence",
+          "type": "address"
+        },
+        {
+          "internalType": "string",
+          "name": "_name",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_type",
+          "type": "uint256"
+        }
+      ],
+      "name": "acceptRights",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "agence",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "agences",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "creationTime",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "subscription_type",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_agenceAddress",
+          "type": "address"
+        }
+      ],
+      "name": "getAgenceInfoByAddress",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "rightsAccepted",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "stateMutability": "payable",
+      "type": "receive"
+    }
+  ]; // Your contract ABI
+
+            // Define a variable to store the account address
+            let account;
+
+            // Define the contract instance
+            let contract;
+
+            // Define a function to connect MetaMask
+            const connectMetamask = async () => {
+                try {
+                    if (window.ethereum) {
+                        const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+                        account = accounts[0];
+                        accountArea.textContent = account;
+                    } else {
+                        accountArea.textContent = "Please install Metamask or use a web3 browser";
+                    }
+                } catch (error) {
+                    console.error(error);
+                    accountArea.textContent = "An error occurred while connecting Metamask";
+                }
+            }
+
+            // Define a function to connect the contract
+            const connectContract = async () => {
+                try {
+                    if (account) {
+                        window.web3 = new Web3(window.ethereum);
+                        contract = new window.web3.eth.Contract(contractABI, contractAddress);
+                        contractArea.textContent = "Connected to contract at address: " + contractAddress;
+                    } else {
+                        contractArea.textContent = "Please connect to MetaMask first";
+                    }
+                } catch (error) {
+                    console.error(error);
+                    contractArea.textContent = "An error occurred while connecting to the contract";
+                }
+            }
+
+            // Define a function to accept rights
+            const acceptRights = async () => {
+                try {
+                    if (account && contract) {
+                        name = document.getElementById("name").value;
+                        subscribtion_type = document.getElementById("subscription_type").value;
+                       switch(subscribtion_type){
+                            case "1":
+                                prix = 0;
+                                break;
+                            case "2":
+                                prix = 0.3;
+                                break;
+                            case "3":
+                                prix = 0.5;
+                                break;
+                            default:
+                                prix = 0;
+                        }
+                        await contract.methods.acceptRights(account,name,subscribtion_type).send({ from: account , value: window.web3.utils.toWei(prix.toString(), "ether")});
+                        resultArea.textContent = "Rights accepted successfully";
+                    } else {
+                        resultArea.textContent = "Please connect to MetaMask and the contract first";
+                    }
+                } catch (error) {
+                    console.error(error);
+                    resultArea.textContent = "An error occurred while accepting rights";
+                }
+            }
+
+            // Define a function to get team manager info by address
+            const getAgenceInfoByAddress = async () => {
+                try {
+                    if (account && contract) {
+                        const result = await contract.methods.getAgenceInfoByAddress(account).call({ from: account });
+                        console.log(result);
+                        const timestamp = result[1];
+                        const humanDateTime = new Date(((timestamp-3600) * 1000)).toLocaleString(); // Multiply by 1000 to convert seconds to milliseconds
+                        console.log(humanDateTime);
+                        console.log(result[2]);
+                        // Update your UI or perform other actions with the retrieved data
+                        const nameElement = document.getElementById("name");
+                        nameElement.value = result;
+
+                    } else {
+                        console.log("Please connect to MetaMask and the contract first");
+                    }
+                } catch (error) {
+                    console.error(error);
+                    console.log("An error occurred while getting team manager info");
+                }
+            };
+
+            // Add event listeners to the buttons
+            connectButton.addEventListener('click', connectMetamask);
+            connectContractButton.addEventListener('click', connectContract);
+            acceptRightsButton.addEventListener('click', acceptRights);
+            getAgenceInfoByAddressButton.addEventListener('click', getAgenceInfoByAddress);
+        });
+    </script>
+</body>
+</html>

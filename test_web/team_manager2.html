@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rights Acceptance Contract Web App</title>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.2.7-rc.0/web3.min.js"></script>
+</head>
+<body>
+    <button id="connectButton">Connect to MetaMask</button>
+    <p id="accountArea"></p>
+
+    <button id="connectContractButton">Connect to Contract</button>
+    <p id="contractArea"></p>
+    
+    <h2>Team Manager Information</h2>
+    <form id="teamManagerForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+        <button type="button" id="acceptRightsButton">Accept Rights</button>
+        <button id="getTeamManagerInfoByAddressButton">Get Team Manager Info By Address</button>
+    </form>
+
+    <script>
+        window.addEventListener('load', function () {
+            // Get the elements from the DOM
+            const connectButton = document.getElementById("connectButton");
+            const connectContractButton = document.getElementById("connectContractButton");
+            const acceptRightsButton = document.getElementById("acceptRightsButton");
+            const accountArea = document.getElementById("accountArea");
+            const contractArea = document.getElementById("contractArea");
+            const resultArea = document.getElementById("resultArea");
+            const getTeamManagerInfoByAddressButton = document.getElementById("getTeamManagerInfoByAddressButton");
+
+            // Define the contract address
+            const contractAddress = "0x5a9AE3EeF3CdF30118aC5A55c7B8fa19223D5d65"; // Replace with your contract address
+
+            // Define the contract ABI
+            const contractABI = [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "teamManager",
+          "type": "address"
+        }
+      ],
+      "name": "RightsAccepted",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_teamManager",
+          "type": "address"
+        },
+        {
+          "internalType": "string",
+          "name": "_name",
+          "type": "string"
+        }
+      ],
+      "name": "acceptRights",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_teamManagerAddress",
+          "type": "address"
+        }
+      ],
+      "name": "getTeamManagerInfoByAddress",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "rightsAccepted",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "teamManager",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "teamManagers",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "creationTime",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "terms",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ]; // Your contract ABI
+
+            // Define a variable to store the account address
+            let account;
+
+            // Define the contract instance
+            let contract;
+
+            // Define a function to connect MetaMask
+            const connectMetamask = async () => {
+                try {
+                    if (window.ethereum) {
+                        const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+                        account = accounts[0];
+                        console.log(account);
+                        accountArea.textContent = account;
+                    } else {
+                        accountArea.textContent = "Please install Metamask or use a web3 browser";
+                    }
+                } catch (error) {
+                    console.error(error);
+                    accountArea.textContent = "An error occurred while connecting Metamask";
+                }
+            }
+
+            // Define a function to connect the contract
+            const connectContract = async () => {
+                try {
+                    if (account) {
+                        window.web3 = new Web3(window.ethereum);
+                        contract = new window.web3.eth.Contract(contractABI, contractAddress);
+                        contractArea.textContent = "Connected to contract at address: " + contractAddress;
+                    } else {
+                        contractArea.textContent = "Please connect to MetaMask first";
+                    }
+                } catch (error) {
+                    console.error(error);
+                    contractArea.textContent = "An error occurred while connecting to the contract";
+                }
+            }
+
+            // Define a function to accept rights
+            const acceptRights = async () => {
+            try {
+                if (account && contract) {
+                    const name = document.getElementById("name").value;
+                    await contract.methods.acceptRights(account,name).send({ from: account });
+                    resultArea.textContent = "Rights accepted successfully";
+                } else {
+                    resultArea.textContent = "Please connect to MetaMask and the contract first";
+                }
+            } catch (error) {
+                console.error(error);
+                resultArea.textContent = "An error occurred while accepting rights";
+            }
+        }
+            // Define a function to get team manager info by address
+            const getTeamManagerInfoByAddress = async () => {
+                try {
+                    if (account && contract) {
+                        const result = await contract.methods.getTeamManagerInfoByAddress(account).call({ from: account });
+                        console.log(result);
+                        const timestamp = result[1];
+                        const humanDateTime = new Date(((timestamp)* 1000)).toLocaleString(); // Multiply by 1000 to convert seconds to milliseconds
+                        console.log("Creation date",humanDateTime);
+                        // Update your UI or perform other actions with the retrieved data
+                        const nameElement = document.getElementById("name");
+                        nameElement.value = result[0];
+
+                    } else {
+                        console.log("Please connect to MetaMask and the contract first");
+                    }
+                } catch (error) {
+                    console.error(error);
+                    console.log("An error occurred while getting team manager info");
+                }
+            };
+
+            // Add event listeners to the buttons
+            connectButton.addEventListener('click', connectMetamask);
+            connectContractButton.addEventListener('click', connectContract);
+            acceptRightsButton.addEventListener('click', acceptRights);
+            getTeamManagerInfoByAddressButton.addEventListener('click', getTeamManagerInfoByAddress);
+        });
+    </script>
+</body>
+</html>

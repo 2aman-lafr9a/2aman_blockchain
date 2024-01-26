@@ -1,0 +1,178 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rights Acceptance Contract Web App</title>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.2.7-rc.0/web3.min.js"></script>
+</head>
+<body>
+    <button id="connectButton">Connect to MetaMask</button>
+    <p id="accountArea"></p>
+
+    <button id="connectContractButton">Connect to Contract</button>
+    <p id="contractArea"></p>
+
+    <button id="acceptRightsButton">Accept Rights</button>
+    <p id="resultArea"></p>
+
+    <script>
+        window.addEventListener('load', function () {
+            // Get the elements from the DOM
+            const connectButton = document.getElementById("connectButton");
+            const connectContractButton = document.getElementById("connectContractButton");
+            const acceptRightsButton = document.getElementById("acceptRightsButton");
+            const accountArea = document.getElementById("accountArea");
+            const contractArea = document.getElementById("contractArea");
+            const resultArea = document.getElementById("resultArea");
+
+            // Define the contract address
+            const contractAddress = "0x6208a467C2033e3bb75CBfd12B0EaF9d2679CeeB"; // Replace with your contract address
+
+            // Define the contract ABI
+            const contractABI = [
+   {
+      "constant": false,
+      "inputs": [
+         {
+            "name": "_agence",
+            "type": "address"
+         }
+      ],
+      "name": "acceptRights",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "nonpayable",
+      "type": "function"
+   },
+   {
+      "constant": true,
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+         {
+            "name": "",
+            "type": "address"
+         }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+   },
+   {
+      "constant": true,
+      "inputs": [],
+      "name": "rightsAccepted",
+      "outputs": [
+         {
+            "name": "",
+            "type": "bool"
+         }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+   },
+   {
+      "constant": true,
+      "inputs": [],
+      "name": "agence",
+      "outputs": [
+         {
+            "name": "",
+            "type": "address"
+         }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+   },
+   {
+      "anonymous": false,
+      "inputs": [
+         {
+            "indexed": false,
+            "name": "agence",
+            "type": "address"
+         }
+      ],
+      "name": "RightsAccepted",
+      "type": "event"
+   },
+   {
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "receive"
+   }
+]; // Your contract ABI
+
+            // Define a variable to store the account address
+            let account;
+
+            // Define the contract instance
+            let contract;
+
+            // Define a function to connect MetaMask
+            const connectMetamask = async () => {
+                try {
+                    // Check if the browser supports Ethereum
+                    if (window.ethereum) {
+                        // Request the user to connect their account
+                        const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+                        // Store the account address
+                        account = accounts[0];
+                        // Display the account address
+                        accountArea.textContent = account;
+                    } else {
+                        // Warn the user that they need a web3 browser or extension
+                        accountArea.textContent = "Please install Metamask or use a web3 browser";
+                    }
+                } catch (error) {
+                    // Handle any errors
+                    console.error(error);
+                    accountArea.textContent = "An error occurred while connecting Metamask";
+                }
+            }
+
+            // Define a function to connect the contract
+            const connectContract = async () => {
+                try {
+                    if (account) {
+                        window.web3 = new Web3(window.ethereum);
+                        contract = new window.web3.eth.Contract(contractABI, contractAddress);
+                        contractArea.textContent = "Connected to contract at address: " + contractAddress;
+                    } else {
+                        contractArea.textContent = "Please connect to MetaMask first";
+                    }
+                } catch (error) {
+                    console.error(error);
+                    contractArea.textContent = "An error occurred while connecting to the contract";
+                }
+            }
+
+            // Define a function to accept rights
+            const acceptRights = async () => {
+                try {
+                    if (account && contract) {
+                        // Replace the following line with the actual function call
+                        await contract.methods.acceptRights(account).send({ from: account, value: window.web3.utils.toWei("0.01", "ether") });
+                        resultArea.textContent = "Rights accepted successfully";
+                    } else {
+                        resultArea.textContent = "Please connect to MetaMask and the contract first";
+                    }
+                } catch (error) {
+                    console.error(error);
+                    resultArea.textContent = "An error occurred while accepting rights";
+                }
+            }
+
+            // Add event listeners to the buttons
+            connectButton.addEventListener('click', connectMetamask);
+            connectContractButton.addEventListener('click', connectContract);
+            acceptRightsButton.addEventListener('click', acceptRights);
+        });
+    </script>
+</body>
+</html>
+
