@@ -4,65 +4,47 @@ pragma solidity ^0.8.19;
 contract AgreementContract {
     address public teamManager;
     address public agency;
-    address public AmanAccount;
-    uint256 public offerPrice;
-    string public offerName;
-    bool public contractSigned;
+    address public aman;
 
-    event ContractSigned(address teamManager, address agency, string offerName, uint256 offerPrice);
-
-    modifier onlyTeamManager() {
-        require(msg.sender == teamManager, "Only team manager can call this function");
-        _;
+    struct ContractDetails {
+        uint256 offerPrice;
+        string offerName;
     }
+
+    ContractDetails public contractDetails;
+
+    event ContractSigned(address teamManager, address agency, address aman, string offerName, uint256 offerPrice);
+
 
     constructor() {
         teamManager = msg.sender;
-        AmanAccount = 0x1aC9b5E8731619803c755B729847268fb8961180; // Adresse statique
-        contractSigned = false;
+        aman = 0x1aC9b5E8731619803c755B729847268fb8961180; // Adresse statique
     }
 
-    // Fonction appelée par le Team Manager pour signer le contrat
-    function signContract(address _agency, string memory _offerName, uint256 _offerPrice) external payable {
-        require(!contractSigned, "Contract already signed");
-        require(_agency != address(0), "Invalid agency address");
-        require(teamManager != _agency, "Team manager and agency cannot be the same address");
-        require(_offerPrice > 0, "Offer price should be greater than 0");
-        // Vous pouvez ajouter d'autres vérifications ici en fonction de vos besoins
+    function signContract(address _agency, string memory _offerName, uint256 _offerPrice) external payable  {
+        
+        require(_agency != address(0), "Adresse d'agence invalide");
+        require(teamManager != _agency, "Le gestionnaire d equipe et l agence ne peuvent pas avoir la meme adresse");
+        require(_offerPrice > 0, "Le prix de l offre doit etre superieur a 0");
 
-        // Calculer la commission (10% du prix de l'offre)
         uint256 commission = (_offerPrice * 10) / 100;
-        require(commission > 0, "Commission should be greater than 0");
+        require(commission > 0 , "Commission incorrecte");
 
-        // Vérifier que la valeur envoyée est égale à la commission
-        require(msg.value == commission, "Incorrect commission amount sent");
+        (bool transferToAmanSuccess, ) = payable(aman).call{value: commission}("");
+        require(transferToAmanSuccess, "Echec du transfert a Aman");
 
-        // Effectuer le transfert de la commission à l'adresse AmanAccount
-        (bool transferToAmanSuccess, ) = payable(AmanAccount).call{value: commission}("");
-        require(transferToAmanSuccess, "Failed to transfer commission to AmanAccount");
+        (bool transferToAgencySuccess, ) = payable(_agency).call{value: _offerPrice - commission}("");
+        require(transferToAgencySuccess, "Echec du transfert a l agence");
 
-        // Calculer le montant à transférer à l'agence (prix de l'offre)
-        uint256 amountToAgency = _offerPrice ;
-
-        // Effectuer le transfert de l'argent à l'adresse de l'agence
-        (bool transferToAgencySuccess, ) = payable(_agency).call{value: amountToAgency}("");
-        require(transferToAgencySuccess, "Failed to transfer amount to agency");
-
-        // Mettre à jour les variables de contrat
         agency = _agency;
-        offerName = _offerName;
-        offerPrice = _offerPrice;
-        contractSigned = true;
+        contractDetails.offerName = _offerName;
+        contractDetails.offerPrice = _offerPrice;
 
-        // Émettre l'événement pour notifier la signature du contrat
-        emit ContractSigned(teamManager, agency, offerName, offerPrice);
+        emit ContractSigned(teamManager, agency, aman, _offerName, _offerPrice);
     }
 
-    // Fonction pour récupérer les détails du contrat
-    function getContractDetails() external view returns (address, address, address, string memory, uint256, bool) {
-        return (teamManager, agency, AmanAccount, offerName, offerPrice, contractSigned);
+    function getContractDetails() external view returns (address, address, address, uint256, string memory, string memory) {
+        return (teamManager, agency, aman, contractDetails.offerPrice, contractDetails.offerName,"contract signed" );
     }
 }
-
-
-//0x1e07ABcC3222F04Ac5c065598F05a7bd645E0a9f
+//0x5428d444F3BADf2b9C20648282EBBA38d4556AbA

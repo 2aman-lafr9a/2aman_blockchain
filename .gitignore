@@ -1,6 +1,7 @@
 node_modules
 .env
-
+test_web
+/test_web
 # Hardhat files
 /cache
 /artifacts

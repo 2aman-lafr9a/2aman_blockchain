@@ -40,7 +40,7 @@
             let account;
             let contract;
 
-            const contractAddress = "0x1e07ABcC3222F04Ac5c065598F05a7bd645E0a9f"; // Replace with your contract address
+            const contractAddress = "0x5428d444F3BADf2b9C20648282EBBA38d4556AbA"; // Replace with your contract address
             const contractABI = [
     {
       "inputs": [],
@@ -64,6 +64,12 @@
         },
         {
           "indexed": false,
+          "internalType": "address",
+          "name": "aman",
+          "type": "address"
+        },
+        {
+          "indexed": false,
           "internalType": "string",
           "name": "offerName",
           "type": "string"
@@ -80,19 +86,6 @@
     },
     {
       "inputs": [],
-      "name": "AmanAccount",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
       "name": "agency",
       "outputs": [
         {
@@ -106,12 +99,30 @@
     },
     {
       "inputs": [],
-      "name": "contractSigned",
+      "name": "aman",
       "outputs": [
         {
-          "internalType": "bool",
+          "internalType": "address",
           "name": "",
-          "type": "bool"
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "contractDetails",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "offerPrice",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "offerName",
+          "type": "string"
         }
       ],
       "stateMutability": "view",
@@ -137,45 +148,19 @@
           "type": "address"
         },
         {
-          "internalType": "string",
-          "name": "",
-          "type": "string"
-        },
-        {
           "internalType": "uint256",
           "name": "",
           "type": "uint256"
         },
         {
-          "internalType": "bool",
+          "internalType": "string",
           "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "offerName",
-      "outputs": [
+          "type": "string"
+        },
         {
           "internalType": "string",
           "name": "",
           "type": "string"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "offerPrice",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
         }
       ],
       "stateMutability": "view",
@@ -283,8 +268,8 @@
                             Team Manager: ${result[0]}
                             Agency: ${result[1]}
                             Aman Account: ${result[2]}
-                            Offer Name: ${result[3]}
-                            Offer Price: ${result[4]}
+                            Offer Price ${result[3]}
+                            Offer Name: ${result[4]}
                             Contract Signed: ${result[5]}
                         `;
                     } else {
